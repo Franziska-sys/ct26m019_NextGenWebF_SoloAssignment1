@@ -44,7 +44,7 @@ const emit = defineEmits<{
 .table-box {
   border: 1px solid var(--border);
   border-radius: 6px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 .table {
   width: 100%;

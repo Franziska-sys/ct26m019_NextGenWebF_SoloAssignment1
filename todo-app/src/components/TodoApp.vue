@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { Todo } from '../types/todo'
 import TodoList from './TodoList.vue'
+import { useTodos } from '../composables/useToDos'
 
 type Filter = 'all' | 'open' | 'done'
 
@@ -12,13 +12,14 @@ const filters: { value: Filter; label: string }[] = [
   { value: 'done', label: 'Erledigt' },
 ]
 
-//all the state is kept in this component, which is the parent of the list and items. 
-// The list and items are just components that receive props and emit events.
-const todos = ref<Todo[]>([])
+//data and methods from the useTodos composable
+const { todos , addTodo, toggleTodo, updateTodo, deleteTodo } = useTodos()
+
+// Local state for new todo text, filter selection, and form visibility
 const newText = ref('')
 const filter = ref<Filter>('all')
 const showForm = ref(false)
-let nextId = 1
+
 
 const filteredTodos = computed(() => {
   if (filter.value === 'open') {
@@ -30,34 +31,15 @@ const filteredTodos = computed(() => {
   return todos.value
 })
 
-function addTodo() {
-  const text = newText.value.trim()
-  if (text === '') return
-
-  todos.value.push({ id: nextId++, text, done: false })
-  newText.value = ''
-}
-
-function toggleTodo(id: number) {
-  const todo = todos.value.find((t) => t.id === id)
-  if (todo) {
-    todo.done = !todo.done
-  }
-}
-
-function updateTodo(id: number, text: string) {
-  const todo = todos.value.find((t) => t.id === id)
-  if (todo) todo.text = text
-}
-
-function removeTodo(id: number) {
-  todos.value = todos.value.filter((t) => t.id !== id)
+function submit(){
+  addTodo(newText.value)
+  newText.value = ''  
 }
 </script>
 
 <template>
   <div>
-     <header class="header">
+     <header class="hero">
         <h1>ToDo-App</h1>
      </header>
 
@@ -83,16 +65,16 @@ function removeTodo(id: number) {
         <input
         v-model="newText"
         placeholder="Neues Todo"
-        @keyup.enter="addTodo"
+        @keyup.enter="submit"
       />
-      <button class="add-btn" @click="addTodo">Hinzufügen</button>
+      <button class="add-btn" @click="submit">Speichern</button>
     </div>
 
     <TodoList
       :todos="filteredTodos"
       @toggle="toggleTodo"
       @update="updateTodo"
-      @remove="removeTodo"
+      @delete="deleteTodo"
     />
     </div>  
   </div>
